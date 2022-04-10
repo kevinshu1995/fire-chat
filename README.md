@@ -1,29 +1,15 @@
-# chat
+# Realtime chat
 
-- **template of:** vite + react
-- **tailwindcss:** v3.x
+## Todo
 
-## Started
-```bash
-yarn
-# or `npm install`
-```
+- [ ] Router
+- [ ] 會員系統
+  - [ ] Google、匿名、github
+- [ ] 聊天室 (public & private)
 
----
-## Develop
-```bash
-yarn dev
-# or `npm run dev`
-```
+## Need to fix
 
----
-## Build
-```bash
-yarn build
-# or `npm run build`
-```
-
----
-<p align="center">
-<img src="./powered-by-vitawind-bright.png">
-</p>
+- [ ] 聊天
+  - [ ] 送出訊息後需捲動至最下方
+  - [ ] 無限上捲訊息
+  - [ ] 新增送出按鈕
