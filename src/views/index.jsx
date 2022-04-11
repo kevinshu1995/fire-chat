@@ -1,10 +1,10 @@
 import React from 'react'
 import { Navigate, useRoutes } from 'react-router-dom'
 
-import Layout from './Layout.jsx'
-import Chat from './chat/Chat.jsx'
+import Layout from './Layout.jsx.js'
+import Chat from './chat/Chat.jsx.js'
 import ChatRoom from './chat/ChatRoom.jsx'
-import Login from './Login.jsx'
+import Login from './Login.jsx.js'
 
 const routes = [
   {

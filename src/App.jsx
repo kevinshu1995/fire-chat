@@ -1,6 +1,6 @@
 import React from 'react'
 
-import View from './routes/index.jsx'
+import View from './views/index.jsx'
 
 function App() {
   return (
