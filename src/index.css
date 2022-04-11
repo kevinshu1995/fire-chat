@@ -14,5 +14,5 @@ textarea {
 }
 
 button {
-  @apply transition-all hover:shadow;
+  @apply transition-all hover:shadow disabled:cursor-default disabled:hover:shadow-none;
 }

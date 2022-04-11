@@ -6,7 +6,10 @@ import Icon from './Icon.jsx'
 import clsx from 'clsx'
 
 export default function Navigation() {
-  const { logout } = useAuth()
+  const { logout, user } = useAuth()
+
+  const userName = () => user.displayName ?? 'Guest'
+
   const avatarLinks = [
     {
       text: 'Account',
@@ -27,13 +30,13 @@ export default function Navigation() {
       onClick: () => {
         logout()
       },
-      disabled: true,
+      disabled: false,
     },
   ]
 
   return (
     <nav className="sticky top-0 left-0 z-40 w-full bg-white shadow">
-      <div className="flex gap-4 py-2 px-4">
+      <div className="flex gap-4 py-3 px-4">
         <div className="flex items-center">
           <Link to="/chat/1">
             <h1 className="font-bold">Real Chat</h1>
@@ -44,8 +47,11 @@ export default function Navigation() {
             <h2>Public chat</h2>
           </div>
           <Menu as="div" className="relative inline-block text-left">
-            <Menu.Button className="flex h-10 w-10 overflow-hidden rounded-full border-2 border-green-400 transition-transform hover:scale-105">
-              <img src="https://i.pravatar.cc/300" alt="User avatar" />
+            <Menu.Button className="flex items-center gap-4 rounded-full pl-4">
+              <p>{userName()}</p>
+              <div className="flex h-8 w-8 overflow-hidden rounded-full border-2 border-green-400 transition-transform hover:scale-105">
+                <img src="https://i.pravatar.cc/300" alt="User avatar" />
+              </div>
             </Menu.Button>
             <Transition
               as={Fragment}
@@ -57,44 +63,49 @@ export default function Navigation() {
               leaveTo="transform opacity-0 scale-95"
             >
               <Menu.Items className="absolute right-0 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                <div className="p-2">
+                <div className="divide-y-2 divide-gray-100 p-2">
                   {avatarLinks.map((link, index) => {
                     return (
-                      <Menu.Item
-                        disabled={link.disabled}
-                        key={`avatar-link-${index}`}
-                      >
-                        {({ active }) => {
-                          return (
-                            <button
-                              className={clsx(
-                                active
-                                  ? 'bg-green-500 text-white'
-                                  : 'text-gray-900',
-                                'w-full rounded-md p-2 text-sm transition-colors'
-                              )}
-                            >
-                              {link.to ? (
-                                <Link
-                                  className="flex w-full items-center gap-2"
-                                  to={link.to}
-                                >
-                                  <div>{link.icon}</div>
-                                  <span>{link.text}</span>
-                                </Link>
-                              ) : (
-                                <div
-                                  className="flex w-full items-center gap-2"
-                                  onClick={link.onClick}
-                                >
-                                  <div>{link.icon}</div>
-                                  <span>{link.text}</span>
-                                </div>
-                              )}
-                            </button>
-                          )
-                        }}
-                      </Menu.Item>
+                      <div className="py-1" key={`avatar-link-${index}`}>
+                        <Menu.Item disabled={link.disabled}>
+                          {({ active }) => {
+                            return (
+                              <button
+                                className={clsx(
+                                  active && 'bg-green-500 text-white',
+                                  !link.disabled
+                                    ? 'hover:bg-green-500 hover:text-white'
+                                    : 'pointer-events-none text-gray-300',
+
+                                  'w-full rounded-md p-2 text-sm transition-colors'
+                                )}
+                                disabled={link.disabled}
+                              >
+                                {link.to ? (
+                                  <Link
+                                    className={clsx([
+                                      link.disabled && 'cursor-default',
+                                      'flex w-full items-center gap-2',
+                                    ])}
+                                    to={link.to}
+                                  >
+                                    <div>{link.icon}</div>
+                                    <span>{link.text}</span>
+                                  </Link>
+                                ) : (
+                                  <div
+                                    className="flex w-full items-center gap-2"
+                                    onClick={link.onClick}
+                                  >
+                                    <div>{link.icon}</div>
+                                    <span>{link.text}</span>
+                                  </div>
+                                )}
+                              </button>
+                            )
+                          }}
+                        </Menu.Item>
+                      </div>
                     )
                   })}
                 </div>
