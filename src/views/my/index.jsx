@@ -1,6 +1,6 @@
 import { Outlet } from 'react-router-dom'
 
-export default function Chat() {
+export default function () {
   return (
     <>
       <Outlet />
