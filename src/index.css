@@ -6,3 +6,13 @@ body,
 html {
   @apply h-full min-h-full;
 }
+
+input,
+select,
+textarea {
+  @apply outline-none ring-2 ring-transparent transition-all focus:ring-cyan-300;
+}
+
+button {
+  @apply transition-all hover:shadow;
+}

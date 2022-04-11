@@ -1,10 +1,12 @@
 import { Fragment } from 'react'
 import { Link } from 'react-router-dom'
 import { Menu, Transition } from '@headlessui/react'
+import { useAuth } from '/src/hooks/useAuth.jsx'
 import Icon from './Icon.jsx'
 import clsx from 'clsx'
 
 export default function Navigation() {
+  const { logout } = useAuth()
   const avatarLinks = [
     {
       text: 'Account',
@@ -16,6 +18,15 @@ export default function Navigation() {
       text: 'Setting',
       icon: <Icon icon="Adjustments" />,
       to: '/my/setting',
+      disabled: true,
+    },
+    {
+      text: 'Log out',
+      icon: <Icon icon="Logout" />,
+      to: null,
+      onClick: () => {
+        logout()
+      },
       disabled: true,
     },
   ]
@@ -55,18 +66,32 @@ export default function Navigation() {
                       >
                         {({ active }) => {
                           return (
-                            <Link
+                            <button
                               className={clsx(
                                 active
                                   ? 'bg-green-500 text-white'
                                   : 'text-gray-900',
-                                'flex w-full items-center gap-2 rounded-md p-2 text-sm transition-colors'
+                                'w-full rounded-md p-2 text-sm transition-colors'
                               )}
-                              to={link.to}
                             >
-                              <div>{link.icon}</div>
-                              <span>{link.text}</span>
-                            </Link>
+                              {link.to ? (
+                                <Link
+                                  className="flex w-full items-center gap-2"
+                                  to={link.to}
+                                >
+                                  <div>{link.icon}</div>
+                                  <span>{link.text}</span>
+                                </Link>
+                              ) : (
+                                <div
+                                  className="flex w-full items-center gap-2"
+                                  onClick={link.onClick}
+                                >
+                                  <div>{link.icon}</div>
+                                  <span>{link.text}</span>
+                                </div>
+                              )}
+                            </button>
                           )
                         }}
                       </Menu.Item>
