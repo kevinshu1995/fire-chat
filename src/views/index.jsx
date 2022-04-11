@@ -15,18 +15,25 @@ const routes = [
     element: <Layout />,
     children: [
       {
-        path: 'chat',
-        element: <Chat />,
-        children: [{ path: ':id', element: <ChatRoom /> }],
+        path: '',
+        element: <Navigate to="/chat/1" replace />,
       },
       {
-        path: 'my',
-        element: <MyLayout />,
+        path: 'chat',
+        element: <Chat />,
         children: [
-          { path: 'account', element: <Account /> },
-          { path: 'setting', element: <Setting /> },
+          { path: '', element: <Navigate to="/chat/1" replace /> },
+          { path: ':id', element: <ChatRoom /> },
         ],
       },
+      // {
+      //   path: 'my',
+      //   element: <MyLayout />,
+      //   children: [
+      //     { path: 'account', element: <Account /> },
+      //     { path: 'setting', element: <Setting /> },
+      //   ],
+      // },
     ],
   },
   {

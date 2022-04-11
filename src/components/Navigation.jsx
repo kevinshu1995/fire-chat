@@ -10,13 +10,13 @@ export default function Navigation() {
       text: 'Account',
       icon: <Icon icon="User" />,
       to: '/my/account',
-      disabled: false,
+      disabled: true,
     },
     {
       text: 'Setting',
       icon: <Icon icon="Adjustments" />,
       to: '/my/setting',
-      disabled: false,
+      disabled: true,
     },
   ]
 
