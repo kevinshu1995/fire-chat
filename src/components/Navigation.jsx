@@ -1,14 +1,21 @@
-import { Fragment } from 'react'
+import { Fragment, useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Menu, Transition } from '@headlessui/react'
 import { useAuth } from '/src/hooks/useAuth.jsx'
 import Icon from './Icon.jsx'
 import clsx from 'clsx'
 
+const defaultUserProfile = {
+  avatar: `https://i.pravatar.cc/100?u=${Math.random()
+    .toString(36)
+    .substring(2)}`,
+  email: 'Guest',
+}
+
 export default function Navigation() {
   const { logout, user } = useAuth()
 
-  const userName = () => user?.displayName ?? 'Guest'
+  const [userProfile, setUserProfile] = useState(defaultUserProfile)
 
   const avatarLinks = [
     {
@@ -34,6 +41,13 @@ export default function Navigation() {
     },
   ]
 
+  useEffect(() => {
+    setUserProfile({
+      email: user?.email ?? userProfile.email,
+      avatar: user?.photoURL ?? userProfile.avatar,
+    })
+  }, [user])
+
   return (
     <nav className="sticky top-0 left-0 z-40 w-full bg-white shadow">
       <div className="flex gap-4 py-3 px-4">
@@ -47,10 +61,9 @@ export default function Navigation() {
             <h2>Public chat</h2>
           </div>
           <Menu as="div" className="relative inline-block text-left">
-            <Menu.Button className="flex items-center gap-4 rounded-full pl-4">
-              <p>{userName()}</p>
+            <Menu.Button className="flex items-center gap-4 rounded-full">
               <div className="flex h-8 w-8 overflow-hidden rounded-full border-2 border-green-400 transition-transform hover:scale-105">
-                <img src="https://i.pravatar.cc/300" alt="User avatar" />
+                <img src={userProfile.avatar} alt="User avatar" />
               </div>
             </Menu.Button>
             <Transition
@@ -62,8 +75,23 @@ export default function Navigation() {
               leaveFrom="transform opacity-100 scale-100"
               leaveTo="transform opacity-0 scale-95"
             >
-              <Menu.Items className="absolute right-0 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+              <Menu.Items className="absolute right-0 mt-2 w-72 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                 <div className="divide-y-2 divide-gray-100 p-2">
+                  <Menu.Item>
+                    <div className="flex gap-4 py-4 px-2 text-xs">
+                      <div className="h-12 w-12 overflow-hidden rounded-lg">
+                        <img src={userProfile.avatar} alt="User avatar" />
+                      </div>
+                      <ul className="text-gray-700">
+                        <li className="flex items-center gap-2">
+                          <span>
+                            <Icon icon="Mail" />
+                          </span>
+                          {userProfile.email}
+                        </li>
+                      </ul>
+                    </div>
+                  </Menu.Item>
                   {avatarLinks.map((link, index) => {
                     return (
                       <div className="py-1" key={`avatar-link-${index}`}>

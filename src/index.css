@@ -4,7 +4,7 @@
 
 body,
 html {
-  @apply h-full min-h-full;
+  @apply h-full min-h-full text-gray-800;
 }
 
 input,
