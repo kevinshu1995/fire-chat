@@ -8,7 +8,7 @@ import clsx from 'clsx'
 export default function Navigation() {
   const { logout, user } = useAuth()
 
-  const userName = () => user.displayName ?? 'Guest'
+  const userName = () => user?.displayName ?? 'Guest'
 
   const avatarLinks = [
     {
