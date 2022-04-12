@@ -6,6 +6,7 @@ import {
 } from '/src/api/firebaseAuth.js'
 import { createContext, useState, useContext, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import Loading from '/src/components/Loading.jsx'
 
 export const authContext = createContext(null)
 
@@ -18,6 +19,7 @@ const authResult = {
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
+  const [isLoading, setIsLoading] = useState(true)
   const navigate = useNavigate()
 
   const emailSignUp = async ({ email, password }) => {
@@ -62,16 +64,55 @@ export function AuthProvider({ children }) {
     navigate('/login')
   }
 
+  const updateUserProfile = async ({ displayName = null, photoURL = null }) => {
+    if (!auth?.currentUser === false) {
+      return {
+        message: 'Not login yet',
+        isSuccess: false,
+      }
+    }
+    try {
+      await updateProfile(auth.currentUser, {
+        displayName,
+        photoURL,
+      })
+      return {
+        message: 'Update profile success!',
+        isSuccess: true,
+      }
+    } catch (error) {
+      console.error(error)
+      return {
+        message: 'Sorry, updating profile failed.',
+        isSuccess: false,
+      }
+    }
+  }
+
   useEffect(() => {
     onAuthStateChanged((user) => {
       const isLogin = !!user
       console.log(user ? 'Login' : 'Logout', `user: `, user)
       setUser(isLogin ? user : null)
+      setTimeout(() => {
+        setIsLoading(false)
+      }, 300)
     })
   }, [])
 
-  const value = { user, isLogin: !!user, emailSignUp, emailLogin, logout }
-  return <authContext.Provider value={value}>{children}</authContext.Provider>
+  const value = {
+    user,
+    isLogin: !!user,
+    emailSignUp,
+    emailLogin,
+    logout,
+    updateUserProfile,
+  }
+  return (
+    <authContext.Provider value={value}>
+      {isLoading ? <Loading /> : children}
+    </authContext.Provider>
+  )
 }
 
 export function useAuth() {
