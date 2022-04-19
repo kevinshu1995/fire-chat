@@ -19,6 +19,7 @@ export default function Navigation() {
   const [userProfile, setUserProfile] = useState(defaultUserProfile)
 
   const title = () => {
+    if (!!chatroomId === false) return ''
     return chatroomId === '1' ? 'Public room' : `Chat #${chatroomId}`
   }
 
