@@ -43,8 +43,8 @@ export default function Navigation() {
 
   useEffect(() => {
     setUserProfile({
-      email: user?.email ?? userProfile.email,
-      avatar: user?.photoURL ?? userProfile.avatar,
+      email: user?.email,
+      avatar: user?.photoURL,
     })
   }, [user])
 

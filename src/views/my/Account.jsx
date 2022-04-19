@@ -30,8 +30,18 @@ export default function Account() {
     })
   }
 
-  const uploadPhoto = () => {
-    toast.default('Sorry, this feature has not done yet.')
+  const uploadPhoto = async () => {
+    const randomPhoto = () =>
+      `https://i.pravatar.cc/100?u=${Math.random().toString(36).substring(2)}`
+    const { isSuccess, message } = await updateUserProfile({
+      displayName: null,
+      photoURL: randomPhoto(),
+    })
+    if (isSuccess) {
+      toast.default(message)
+    } else {
+      toast.error(message)
+    }
   }
 
   const onSubmit = async (e) => {
@@ -128,7 +138,7 @@ export default function Account() {
               <span className="absolute left-0 top-0 z-20 h-full w-full bg-gray-800 opacity-0 transition-all hover:opacity-60">
                 <div className="flex h-full flex-col items-center justify-center text-white">
                   <Icon className="h-6 w-6" icon="Pencil" />
-                  <span>Upload</span>
+                  <span>Random Photo</span>
                 </div>
               </span>
               <img src={user.photoURL} alt="User photo" />

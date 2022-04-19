@@ -33,6 +33,14 @@ export function AuthProvider({ children }) {
     setIsLoading(true)
     try {
       const { userCredential } = await firebaseSignUpEmail({ email, password })
+      const { isSuccess, message } = await updateUserProfile({
+        photoURL: `https://i.pravatar.cc/100?u=${Math.random()
+          .toString(36)
+          .substring(2)}`,
+      })
+
+      console.log(`update user photo result: ${isSuccess}, ${message}`)
+
       return { ...authResult, userCredential, isSuccess: true, redirect: '/' }
     } catch (error) {
       return {
@@ -185,19 +193,7 @@ export function AuthProvider({ children }) {
       const isLogin = !!user
       console.log(user ? 'Login' : 'Logout', `user: `, user)
 
-      const randomPhoto = `https://i.pravatar.cc/100?u=${Math.random()
-        .toString(36)
-        .substring(2)}`
-
-      setUser(
-        isLogin
-          ? {
-              ...user,
-              photoURL: user?.photoURL ?? randomPhoto,
-              randomPhoto: !user?.photoURL,
-            }
-          : null
-      )
+      setUser(isLogin ? user : null)
 
       setTimeout(() => {
         setIsLoading(false)
