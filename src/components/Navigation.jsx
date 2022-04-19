@@ -1,5 +1,5 @@
 import { Fragment, useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { Menu, Transition } from '@headlessui/react'
 import { useAuth } from '/src/hooks/useAuth.jsx'
 import Icon from './Icon.jsx'
@@ -14,8 +14,13 @@ const defaultUserProfile = {
 
 export default function Navigation() {
   const { logout, user } = useAuth()
+  const { chatroomId } = useParams()
 
   const [userProfile, setUserProfile] = useState(defaultUserProfile)
+
+  const title = () => {
+    return chatroomId === '1' ? 'Public room' : `Chat #${chatroomId}`
+  }
 
   const avatarLinks = [
     {
@@ -58,7 +63,7 @@ export default function Navigation() {
         </div>
         <div className="flex flex-grow justify-between">
           <div className="flex items-center">
-            <h2>Public chat</h2>
+            <h2>{title()}</h2>
           </div>
           <Menu as="div" className="relative inline-block text-left">
             <Menu.Button className="flex items-center gap-4 rounded-full">

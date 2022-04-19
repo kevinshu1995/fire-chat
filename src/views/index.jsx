@@ -1,5 +1,5 @@
 import React from 'react'
-import { Navigate, useRoutes } from 'react-router-dom'
+import { Navigate, useRoutes, useParams } from 'react-router-dom'
 
 import { useAuth } from '/src/hooks/useAuth.jsx'
 
@@ -19,6 +19,7 @@ const redirect = {
 
 export default function View() {
   const { isLogin } = useAuth()
+  let { chatroomId } = useParams()
 
   const routes = [
     {
@@ -41,7 +42,10 @@ export default function View() {
               path: '',
               element: <GeneralNavigate />,
             },
-            { path: ':id', element: <ChatRoom /> },
+            {
+              path: ':chatroomId',
+              element: <ChatRoom />,
+            },
           ],
         },
         {

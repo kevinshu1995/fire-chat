@@ -5,11 +5,11 @@ import { pushMessage, observeMessage } from '/src/api/message.js'
 import dayjs from 'dayjs'
 
 export default function ChatRoom() {
-  const { id } = useParams()
+  const { chatroomId } = useParams()
   const [user, setUser] = useState(null)
   const [messages, setMessages] = useState([])
   const [isAbleToSend, setIsAbleToSend] = useState(false)
-  const roomId = id
+  const roomId = chatroomId
 
   const isMineMsg = (message) => {
     if (user === null || message?.user?.id === undefined) return false
