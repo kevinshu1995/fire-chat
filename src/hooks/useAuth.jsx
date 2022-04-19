@@ -11,6 +11,7 @@ import {
 import { createContext, useState, useContext, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useLoading } from './useLoading.jsx'
+import { updateDbUserId } from '/src/api/user.js'
 
 export const authContext = createContext(null)
 
@@ -103,10 +104,16 @@ export function AuthProvider({ children }) {
         displayName,
         photoURL,
       })
-      setUser({
+
+      const newInfo = {
         ...user,
-        displayName,
-      })
+        displayName: displayName || user.displayName || null,
+        photoURL: photoURL || user.photoURL || null,
+      }
+
+      setUser(newInfo)
+      await updateDbUserId(newInfo)
+
       return {
         displayName,
         message: 'Update profile success!',
@@ -141,10 +148,13 @@ export function AuthProvider({ children }) {
     try {
       await updateEmail(auth.currentUser, newEmail)
 
-      setUser({
+      const newInfo = {
         ...user,
         email: newEmail,
-      })
+      }
+
+      setUser(newInfo)
+      await updateDbUserId(newInfo)
 
       return {
         email,
@@ -189,11 +199,16 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     setIsLoading(true)
-    onAuthStateChanged((user) => {
+    onAuthStateChanged(async (user) => {
       const isLogin = !!user
       console.log(user ? 'Login' : 'Logout', `user: `, user)
 
-      setUser(isLogin ? user : null)
+      if (isLogin === true) {
+        const userInfo = await updateDbUserId(user)
+        setUser(userInfo)
+      } else {
+        setUser(null)
+      }
 
       setTimeout(() => {
         setIsLoading(false)

@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { updateDbUserId } from '/src/api/user.js'
+import { useAuth } from '/src/hooks/useAuth.jsx'
 import { pushMessage, observeMessage } from '/src/api/message.js'
 import dayjs from 'dayjs'
+import clsx from 'clsx'
 
 export default function ChatRoom() {
   const { chatroomId } = useParams()
-  const [user, setUser] = useState(null)
+  const { user } = useAuth()
   const [messages, setMessages] = useState([])
   const [isAbleToSend, setIsAbleToSend] = useState(false)
   const roomId = chatroomId
@@ -33,11 +35,25 @@ export default function ChatRoom() {
     setIsAbleToSend(true)
   }
 
+  const isShowMsgDetail = (msg, index, msgAry) => {
+    const isFirstMsg = !msgAry[index + 1]
+
+    const previousUid = !!msgAry[index + 1] ? msgAry[index + 1].user.uid : null
+    const currentUid = msg.user.uid
+    const isSameGuyAsPrevious = previousUid === currentUid
+
+    const currentTime = dayjs(msg.createdAt).format('YYYYMMDDHHmm')
+    const previousTime = !!msgAry[index + 1]
+      ? dayjs(msgAry[index + 1].createdAt).format('YYYYMMDDHHmm')
+      : null
+    const isSameMinute = currentTime === previousTime
+
+    if (isFirstMsg === true) return true
+    if (isSameGuyAsPrevious === false) return true
+    return isSameMinute === false
+  }
+
   useEffect(async () => {
-    const userInfo = await updateDbUserId()
-
-    setUser(userInfo)
-
     await observeMessage({
       roomId,
       msgQuantity: 50,
@@ -58,31 +74,51 @@ export default function ChatRoom() {
       <div className="flex flex-grow">
         {/* messages */}
         <div className="w-full self-stretch">
-          <ul className="flex h-full flex-col-reverse gap-2 p-4">
-            {[...messages].reverse().map((msg, index) =>
+          <ul className="flex h-full flex-col-reverse p-4">
+            {[...messages].reverse().map((msg, index, msgAry) =>
               isMineMsg(msg) ? (
-                <li key={index} className="ml-auto flex flex-col items-end">
-                  <p
-                    className="peer rounded-md bg-teal-200 px-3 py-2 shadow-sm"
-                    tabIndex="-1"
-                  >
-                    {msg.message}
-                  </p>
-                  <span className="block text-xs text-gray-400 opacity-0 transition-all peer-focus:pt-1 peer-focus:opacity-100">
-                    {dayjs(msg.createdAt).format('YYYY/MM/DD HH:mm')}
-                  </span>
+                <li
+                  key={index}
+                  className={clsx([
+                    'ml-auto flex items-end gap-4',
+                    isShowMsgDetail(msg, index, msgAry) ? 'pt-4' : 'pt-1',
+                  ])}
+                >
+                  <div className="flex flex-col items-end gap-2">
+                    {isShowMsgDetail(msg, index, msgAry) && (
+                      <MsgCaption msg={msg} />
+                    )}
+                    <Message bg="bg-teal-200" msg={msg} />
+                  </div>
+                  <Avatar
+                    photo={msg.user.photoURL}
+                    className={clsx([
+                      isShowMsgDetail(msg, index, msgAry) === false &&
+                        'opacity-0',
+                    ])}
+                  />
                 </li>
               ) : (
-                <li key={index} className="mr-auto flex flex-col items-start">
-                  <p
-                    className="peer rounded-md bg-gray-300 px-3 py-2 shadow-sm"
-                    tabIndex="-1"
-                  >
-                    {msg.message}
-                  </p>
-                  <span className="block text-xs text-gray-400 opacity-0 transition-all peer-focus:pt-1 peer-focus:opacity-100">
-                    {dayjs(msg.createdAt).format('YYYY/MM/DD HH:mm')}
-                  </span>
+                <li
+                  key={index}
+                  className={clsx([
+                    'mr-auto flex flex-row-reverse items-start gap-4',
+                    isShowMsgDetail(msg, index, msgAry) ? 'pt-4' : 'pt-1',
+                  ])}
+                >
+                  <div className="flex flex-col gap-2">
+                    {isShowMsgDetail(msg, index, msgAry) && (
+                      <MsgCaption msg={msg} reverse />
+                    )}
+                    <Message bg="bg-gray-300" msg={msg} reverse />
+                  </div>
+                  <Avatar
+                    photo={msg.user.photoURL}
+                    className={clsx([
+                      isShowMsgDetail(msg, index, msgAry) === false &&
+                        'opacity-0',
+                    ])}
+                  />
                 </li>
               )
             )}
@@ -108,5 +144,47 @@ export default function ChatRoom() {
         />
       </form>
     </div>
+  )
+}
+
+function Avatar({ photo, className }) {
+  return (
+    <div
+      className={clsx([
+        'mt-1 h-10 w-10 self-start overflow-hidden rounded-full',
+        className,
+      ])}
+    >
+      <img src={photo} alt="Message owner photo" />
+    </div>
+  )
+}
+
+function MsgCaption({ msg, reverse }) {
+  return (
+    <p
+      className={clsx([
+        'flex gap-4 text-xs font-light text-gray-400',
+        reverse && 'flex-row-reverse',
+      ])}
+    >
+      <span>{dayjs(msg.createdAt).format('YYYY/MM/DD HH:mm')}</span>
+      <span>{msg.user.displayName}</span>
+    </p>
+  )
+}
+
+function Message({ msg, bg, reverse }) {
+  return (
+    <p
+      className={clsx([
+        'rounded-md px-3 py-2 shadow-sm',
+        reverse ? 'self-start' : 'self-end',
+        bg,
+      ])}
+      tabIndex="-1"
+    >
+      {msg.message}
+    </p>
   )
 }
