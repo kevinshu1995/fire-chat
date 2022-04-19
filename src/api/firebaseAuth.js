@@ -5,9 +5,12 @@ import {
   signInWithEmailAndPassword,
   onAuthStateChanged as firebaseOnAuthStateChanged,
   signOut as firebaseSignOut,
+  updateProfile as firebaseUpdateProfile,
+  updateEmail as firebaseUpdateEmail,
+  sendEmailVerification as firebaseSendEmailVerification,
 } from 'firebase/auth'
 
-const auth = getAuth(firebase)
+export const auth = getAuth(firebase)
 
 export function signUpEmail({ email, password }) {
   return createUserWithEmailAndPassword(auth, email, password)
@@ -26,6 +29,12 @@ export function onAuthStateChanged(cb) {
     cb(user)
   })
 }
+
+export const updateProfile = firebaseUpdateProfile
+
+export const updateEmail = firebaseUpdateEmail
+
+export const sendEmailVerification = firebaseSendEmailVerification
 
 export function signOut() {
   return firebaseSignOut(auth)

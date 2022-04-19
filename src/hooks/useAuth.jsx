@@ -3,10 +3,14 @@ import {
   loginEmail as firebaseLoginEmail,
   onAuthStateChanged,
   signOut,
+  updateProfile,
+  updateEmail,
+  sendEmailVerification as firebaseSendEmailVerification,
+  auth,
 } from '/src/api/firebaseAuth.js'
 import { createContext, useState, useContext, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import Loading from '/src/components/Loading.jsx'
+import { useLoading } from './useLoading.jsx'
 
 export const authContext = createContext(null)
 
@@ -19,13 +23,14 @@ const authResult = {
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const { isLoading, setIsLoading } = useLoading()
   const navigate = useNavigate()
 
   const emailSignUp = async ({ email, password }) => {
     if (user !== null) {
       return { ...authResult, isSuccess: true, redirect: '/' }
     }
+    setIsLoading(true)
     try {
       const { userCredential } = await firebaseSignUpEmail({ email, password })
       return { ...authResult, userCredential, isSuccess: true, redirect: '/' }
@@ -35,6 +40,8 @@ export function AuthProvider({ children }) {
         isSuccess: false,
         error: rewriteErrorMsg({ code: error.code, message: error.message }),
       }
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -42,6 +49,7 @@ export function AuthProvider({ children }) {
     if (user !== null) {
       return { ...authResult, isSuccess: true, redirect: '/' }
     }
+    setIsLoading(true)
     try {
       const { userCredential } = await firebaseLoginEmail({ email, password })
       return {
@@ -56,27 +64,43 @@ export function AuthProvider({ children }) {
         isSuccess: false,
         error: rewriteErrorMsg({ code: error.code, message: error.message }),
       }
+    } finally {
+      setIsLoading(false)
     }
   }
 
   const logout = async () => {
+    setIsLoading(true)
     await signOut()
+    setIsLoading(false)
     navigate('/login')
   }
 
   const updateUserProfile = async ({ displayName = null, photoURL = null }) => {
-    if (!auth?.currentUser === false) {
+    if (!!auth?.currentUser === false) {
       return {
-        message: 'Not login yet',
+        message: 'Not login yet.',
         isSuccess: false,
       }
     }
+    if (displayName === null && photoURL === null) {
+      return {
+        message: 'Receive empty data.',
+        isSuccess: false,
+      }
+    }
+    setIsLoading(true)
     try {
       await updateProfile(auth.currentUser, {
         displayName,
         photoURL,
       })
+      setUser({
+        ...user,
+        displayName,
+      })
       return {
+        displayName,
         message: 'Update profile success!',
         isSuccess: true,
       }
@@ -86,14 +110,95 @@ export function AuthProvider({ children }) {
         message: 'Sorry, updating profile failed.',
         isSuccess: false,
       }
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const updateUserEmail = async (newEmail) => {
+    if (!!auth?.currentUser === false) {
+      return {
+        message: 'Not login yet.',
+        isSuccess: false,
+      }
+    }
+
+    if (!!newEmail === false) {
+      return {
+        message: 'Receive wrong value.',
+        isSuccess: false,
+      }
+    }
+    setIsLoading(true)
+    try {
+      await updateEmail(auth.currentUser, newEmail)
+
+      setUser({
+        ...user,
+        email: newEmail,
+      })
+
+      return {
+        email,
+        message: 'Update profile success!',
+        isSuccess: true,
+      }
+    } catch (error) {
+      console.error(error)
+      return {
+        message: 'Sorry, updating email failed.',
+        isSuccess: false,
+      }
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const sendEmailVerification = async () => {
+    if (!!auth?.currentUser === false) {
+      return {
+        message: 'Not login yet.',
+        isSuccess: false,
+      }
+    }
+    setIsLoading(true)
+    try {
+      await firebaseSendEmailVerification(auth.currentUser)
+      return {
+        message: 'Verification Email has sent!',
+        isSuccess: true,
+      }
+    } catch (error) {
+      console.error(error)
+      return {
+        message: 'Sorry, send verification email failed.',
+        isSuccess: false,
+      }
+    } finally {
+      setIsLoading(false)
     }
   }
 
   useEffect(() => {
+    setIsLoading(true)
     onAuthStateChanged((user) => {
       const isLogin = !!user
       console.log(user ? 'Login' : 'Logout', `user: `, user)
-      setUser(isLogin ? user : null)
+
+      const randomPhoto = `https://i.pravatar.cc/100?u=${Math.random()
+        .toString(36)
+        .substring(2)}`
+
+      setUser(
+        isLogin
+          ? {
+              ...user,
+              photoURL: user?.photoURL ?? randomPhoto,
+              randomPhoto: !user?.photoURL,
+            }
+          : null
+      )
+
       setTimeout(() => {
         setIsLoading(false)
       }, 300)
@@ -107,10 +212,12 @@ export function AuthProvider({ children }) {
     emailLogin,
     logout,
     updateUserProfile,
+    updateUserEmail,
+    sendEmailVerification,
   }
   return (
     <authContext.Provider value={value}>
-      {isLoading ? <Loading /> : children}
+      {!isLoading && children}
     </authContext.Provider>
   )
 }
@@ -139,10 +246,6 @@ function rewriteErrorMsg({ code, message }) {
       break
     case 'auth/wrong-password':
       message = 'Wrong password'
-      break
-    case 'auth/too-many-requests':
-      message =
-        'You have attempted to login too many time, please try login later.'
       break
   }
   return {
