@@ -22,7 +22,7 @@ export default function Navigation() {
       text: 'Account',
       icon: <Icon icon="User" />,
       to: '/my/account',
-      disabled: true,
+      disabled: false,
     },
     {
       text: 'Setting',

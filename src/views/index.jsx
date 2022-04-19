@@ -44,14 +44,18 @@ export default function View() {
             { path: ':id', element: <ChatRoom /> },
           ],
         },
-        // {
-        //   path: 'my',
-        //   element: <RequiredAuth><MyLayout /></RequiredAuth>,
-        //   children: [
-        //     { path: 'account', element: <Account /> },
-        //     { path: 'setting', element: <Setting /> },
-        //   ],
-        // },
+        {
+          path: 'my',
+          element: (
+            <RequireAuth>
+              <MyLayout />
+            </RequireAuth>
+          ),
+          children: [
+            { path: 'account', element: <Account /> },
+            // { path: 'setting', element: <Setting /> },
+          ],
+        },
       ],
     },
     {
@@ -81,6 +85,7 @@ function RequireAuth({ children }) {
   const { isLogin } = useAuth()
 
   if (isLogin === false) {
+    console.log('Not login!')
     return <Navigate to={redirect.isNotLogin} replace />
   }
 
