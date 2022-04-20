@@ -12,6 +12,7 @@ import { createContext, useState, useContext, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useLoading } from './useLoading.jsx'
 import { updateDbUserId } from '/src/api/user.js'
+import { useUnmounted } from '/src/hooks/useUnmounted.jsx'
 
 export const authContext = createContext(null)
 
@@ -26,6 +27,7 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const { isLoading, setIsLoading } = useLoading()
   const navigate = useNavigate()
+  const unmountedRef = useUnmounted()
 
   const emailSignUp = async ({ email, password }) => {
     if (user !== null) {
@@ -198,8 +200,9 @@ export function AuthProvider({ children }) {
   }
 
   useEffect(() => {
+    if (unmountedRef) return
     setIsLoading(true)
-    onAuthStateChanged(async (user) => {
+    const removeAuthStateChanged = onAuthStateChanged(async (user) => {
       const isLogin = !!user
       console.log(user ? 'Login' : 'Logout', `user: `, user)
 
@@ -214,6 +217,7 @@ export function AuthProvider({ children }) {
         setIsLoading(false)
       }, 300)
     })
+    return () => removeAuthStateChanged()
   }, [])
 
   const value = {

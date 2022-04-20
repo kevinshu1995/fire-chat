@@ -4,6 +4,7 @@ import { updateDbUserId } from '/src/api/user.js'
 import { useAuth } from '/src/hooks/useAuth.jsx'
 import { pushMessage, observeMessage } from '/src/api/message.js'
 import { useScroll } from '/src/hooks/useScroll.jsx'
+import { useUnmounted } from '/src/hooks/useUnmounted.jsx'
 import dayjs from 'dayjs'
 import clsx from 'clsx'
 
@@ -14,6 +15,7 @@ export default function ChatRoom() {
   const [isAbleToSend, setIsAbleToSend] = useState(false)
   const roomId = chatroomId
   const messageBottom = useRef(null)
+  const unmountedRef = useUnmounted()
 
   useScroll({ refToScroll: messageBottom, stateToWatch: messages })
 
@@ -58,7 +60,8 @@ export default function ChatRoom() {
   }
 
   useEffect(async () => {
-    await observeMessage({
+    if (unmountedRef) return
+    const removeObserveMessage = await observeMessage({
       roomId,
       msgQuantity: 50,
       successCb: (returnMsgs) => {
@@ -71,6 +74,7 @@ export default function ChatRoom() {
     })
 
     setIsAbleToSend(true)
+    return () => removeObserveMessage()
   }, [])
 
   return (
