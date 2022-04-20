@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useParams } from 'react-router-dom'
 import { updateDbUserId } from '/src/api/user.js'
 import { useAuth } from '/src/hooks/useAuth.jsx'
 import { pushMessage, observeMessage } from '/src/api/message.js'
+import { useScroll } from '/src/hooks/useScroll.jsx'
 import dayjs from 'dayjs'
 import clsx from 'clsx'
 
@@ -12,6 +13,9 @@ export default function ChatRoom() {
   const [messages, setMessages] = useState([])
   const [isAbleToSend, setIsAbleToSend] = useState(false)
   const roomId = chatroomId
+  const messageBottom = useRef(null)
+
+  useScroll({ refToScroll: messageBottom, stateToWatch: messages })
 
   const isMineMsg = (message) => {
     if (user === null || message?.user?.id === undefined) return false
@@ -75,6 +79,7 @@ export default function ChatRoom() {
         {/* messages */}
         <div className="w-full self-stretch">
           <ul className="flex h-full flex-col-reverse p-4">
+            <li ref={messageBottom} />
             {[...messages].reverse().map((msg, index, msgAry) =>
               isMineMsg(msg) ? (
                 <li
