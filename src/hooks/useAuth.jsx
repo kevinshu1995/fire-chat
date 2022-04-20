@@ -230,11 +230,7 @@ export function AuthProvider({ children }) {
     updateUserEmail,
     sendEmailVerification,
   }
-  return (
-    <authContext.Provider value={value}>
-      {!isLoading && children}
-    </authContext.Provider>
-  )
+  return <authContext.Provider value={value}>{children}</authContext.Provider>
 }
 
 export function useAuth() {
